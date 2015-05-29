@@ -5,6 +5,10 @@ import org.junit.*;
 import static org.junit.Assert.*;
 import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.ie.InternetExplorerDriver;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
 public class WebdriverTest {
     private WebDriver driver;
@@ -23,13 +27,19 @@ public class WebdriverTest {
     @Test
     public void testJava() throws Exception {
         driver.get(baseUrl + "/en/");
-        driver.findElement(By.linkText("Events")).click();
-        Thread.sleep(2000);
-        driver.findElement(By.linkText("Our events")).click();
-        Thread.sleep(2000);
-        driver.findElement(By.linkText("Education")).click();
+        waitForElement(driver, By.linkText("Events"), 10000).click();
+        waitForElement(driver, By.linkText("Our events"), 10000).click();
+        waitForElement(driver, By.linkText("Education"), 10000).click();
+        waitForElement(driver, By.linkText("About us"), 10000).click();
         Thread.sleep(2000);
         driver.findElement(By.linkText("About us")).click();
+    }
+
+    public WebElement waitForElement(WebDriver driver, By elem, long timeout) throws InterruptedException {
+        WebDriverWait wait = new WebDriverWait(driver, timeout);
+        WebElement element = wait.until(ExpectedConditions.visibilityOfElementLocated(elem));
+        Thread.sleep(2000);
+        return element;
     }
 
     @After
