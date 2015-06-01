@@ -118,4 +118,9 @@ public class ComplexInteractionsTest {
         drop.selectByVisibleText("Option 1");
         Assert.assertEquals(Helper.getFirstSelectedOption(dropdown).getText(), "Option 1");
     }
+
+    @Test
+    public void waitForElementTest() {
+        driver.findElement(By.linkText("Dynamic Controls")).click();
+    }
 }

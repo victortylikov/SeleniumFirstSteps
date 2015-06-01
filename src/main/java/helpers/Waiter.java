@@ -39,4 +39,14 @@ public class Waiter {
             }
         });
     }
+
+    public static void waitForElementDisappear(WebDriver driver, final By locator, long timeout){
+        WebDriverWait wait = new WebDriverWait(driver, timeout, 50);
+        wait.until(new ExpectedCondition<Boolean>() {
+            @Override
+            public Boolean apply(WebDriver driver) {
+                return driver.findElements(locator).size() == 0;
+            }
+        });
+    }
 }
