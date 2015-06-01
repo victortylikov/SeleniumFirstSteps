@@ -1,10 +1,15 @@
 package internet;
 
-
-import org.junit.Assert;
+import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+import org.testng.Assert;
 import org.testng.annotations.*;
+import pages.LoginPage;
+import pages.LoginPageByStatic;
 
 import java.util.concurrent.TimeUnit;
 
@@ -32,18 +37,51 @@ public class AuthenticationTest {
     @DataProvider
     public Object[][] getCreds() {
         return new Object[][] {
-                {"user1", "pass1", true},
-                {"user2", "pass2", true},
-                {"user3", "pass3", true},
+                {"invalidUser", "", false},
+//                {"", "invalidPassword", false},
+//                {"invalidUser", "invalidPassword", false},
+//                {"tomsmith", "SuperSecretPassword!", true},
         };
     }
 
     @Test(dataProvider = "getCreds")
     public void loginTest(String userName, String pass, boolean isValid) {
+        driver.findElement(By.id("username")).sendKeys(userName);
+        driver.findElement(By.id("password")).sendKeys(pass);
+        driver.findElement(By.cssSelector("button[type='submit']")).click();
+        WebDriverWait wait = new WebDriverWait(driver, 8);
+        WebElement message = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("flash")));
         if(isValid) {
-            Assert.assertTrue(true);
+            Assert.assertEquals(driver.getCurrentUrl(), "http://the-internet.herokuapp.com/secure");
+            Assert.assertTrue(message.getText().contains("You logged into a secure area!"));
+            Assert.assertTrue(message.getAttribute("class").contains("success"));
         } else {
-
+            Assert.assertEquals(driver.getCurrentUrl(), BASE_URL);
+            Assert.assertTrue(message.getText().contains("is invalid"));
+            Assert.assertTrue(message.getAttribute("class").contains("error"));
         }
+    }
+
+    @Test(dataProvider = "getCreds")
+    public void loginPageObjectTest(String userName, String pass, boolean isValid) {
+        LoginPageByStatic.login(driver, userName, pass);
+        WebDriverWait wait = new WebDriverWait(driver, 8);
+        WebElement message = wait.until(ExpectedConditions.visibilityOfElementLocated(LoginPageByStatic.VALIDATION_MESSAGE));
+        if(isValid) {
+            Assert.assertEquals(driver.getCurrentUrl(), "http://the-internet.herokuapp.com/secure");
+            Assert.assertTrue(message.getText().contains("You logged into a secure area!"));
+            Assert.assertTrue(message.getAttribute("class").contains("success"));
+        } else {
+            Assert.assertEquals(driver.getCurrentUrl(), BASE_URL);
+            Assert.assertTrue(message.getText().contains("is invalid"));
+            Assert.assertTrue(message.getAttribute("class").contains("error"));
+        }
+    }
+
+    public void logoutFlowTest() {
+
+        new LoginPage(driver)
+                .login("tomsmith", "SuperSecretPassword!")
+                .logout();
     }
 }
