@@ -4,10 +4,12 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.Assert;
 import org.testng.annotations.*;
+import pages.FactoryLoginPage;
 import pages.LoginPage;
 import pages.LoginPageByStatic;
 
@@ -83,5 +85,27 @@ public class AuthenticationTest {
         new LoginPage(driver)
                 .login("tomsmith", "SuperSecretPassword!")
                 .logout();
+    }
+
+    @Test
+    public void factoryLoginTest() {
+        FactoryLoginPage page= PageFactory.initElements(driver,FactoryLoginPage.class);
+        page.login("tomsmith","SuperSecretPassword!");
+        WebDriverWait wait = new WebDriverWait(driver, 8);
+        WebElement message = wait.until(ExpectedConditions.visibilityOfElementLocated(LoginPageByStatic.VALIDATION_MESSAGE));
+        Assert.assertEquals(driver.getCurrentUrl(), "http://the-internet.herokuapp.com/secure");
+        Assert.assertTrue(message.getText().contains("You logged into a secure area!"));
+        Assert.assertTrue(message.getAttribute("class").contains("success"));
+    }
+
+    @Test
+    public void factoryNegativLoginTest() {
+        FactoryLoginPage page= PageFactory.initElements(driver,FactoryLoginPage.class);
+        page.login("user","SuperSecretPassword!");
+        WebDriverWait wait = new WebDriverWait(driver, 8);
+        WebElement message = wait.until(ExpectedConditions.visibilityOf(page.validationMessage));
+        Assert.assertEquals(driver.getCurrentUrl(), "http://the-internet.herokuapp.com/login");
+        Assert.assertTrue(message.getText().contains("Your username is invalid!"));
+        Assert.assertTrue(message.getAttribute("class").contains("error"));
     }
 }
